@@ -1,23 +1,31 @@
-const express = require('express')
 require('dotenv').config()
-const indexRouter = require('./routes/index')
-const productsRouter = require('./routes/productRoutes')
-const router = express.Router()
-
-
+const express = require('express')
 const app = express()
-
 app.use(express.json())
-app.use(express.urlencoded({ extended: false }))
+app.use(express.urlencoded({
+	extended: false
+}))
 
-router.use('/', indexRouter)
-router.use('/products', productsRouter)
-app.use('/api', router)
+// require authentication for any API requests
+const authorizationHandler = require('./middleware/authorizationHandler')
+app.use('/api*', authorizationHandler)
 
-app.use(function (err, req, res, next) {
-	console.error(err.stack)
-	res.status(500).send('Something broke!')
+
+const apiUserRoutes = require('./routes/apiUserRoutes')
+const productsRoutes = require('./routes/productRoutes')
+app.use('/', apiUserRoutes)					// login and registration
+app.use('/api/products', productsRoutes)	// products + details
+
+
+// default home request
+app.get('/', (req, res,) => {
+	res.json({home: 'yup'})
 })
 
+
+// global error handler middleware, receives all Error exception
+// instances and responds with a 200 JSON response body
+const errorHandler = require('./middleware/errorHandler')
+app.use(errorHandler)
 
 module.exports = app
