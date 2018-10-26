@@ -1,4 +1,4 @@
-const db = require('./dbcon')
+const db = require('./DAL/mysqlDal')
 const bcrypt = require('bcryptjs')
 
 class apiUser {
