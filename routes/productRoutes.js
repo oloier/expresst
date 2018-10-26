@@ -44,12 +44,12 @@ router.put('/:id', async (req, res, next) => {
 	try {
 		const id = parseInt(req.params.id)
 		const rows = await product.update(id, req.body)
-		if (rows != undefined && rows.length > 0) {
-			res.json(rows)
-		}
+		if (rows.affectedRows <= 0) throw 'failed to update record'
+		res.json({status: 'success'})
 	} catch (ex) {
+		console.log(ex)
 		let err = new Error(ex)
-		err.status = 500
+		err.status = ex.status || 500
 		return next(err)
 	}
 })

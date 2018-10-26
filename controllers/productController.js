@@ -21,8 +21,8 @@ class product {
 
 	static async add(product) {
 		try {
-			const sql = 'INSERT INTO ascproducts_materialize_changes VALUES(?,?,?)'
-			return await db.execute(sql, [product.id, product.other, product.thing])
+			const sql = 'INSERT INTO ascproducts_materialize_changes SET ?'
+			return await db.query(sql, [product])
 		} catch (ex) {
 			throw ex
 		}
@@ -31,7 +31,7 @@ class product {
 	static async delete(id) {
 		try {
 			const sql = 'DELETE FROM ascproducts_materialize_changes WHERE productNumber=?'
-			return await db.execute(sql, [id])
+			return await db.query(sql, [id])
 		} catch (ex) {
 			throw ex
 		}
@@ -39,51 +39,8 @@ class product {
 
 	static async update(id, product) {
 		try {
-			const sql = `UPDATE ascproducts_materialize_changes SET 
-				productName = ?
-				, productStatus = ?
-				, productPageTitle = ?
-				, productUrl = ?
-				, productSDesc = ?
-				, productDisplay = ?
-				, productAltImg = ?
-				, productLDesc = ?
-				, productMetaDesc = ?
-				, productMKeywords = ?
-				, productKeywords = ?
-				, epicorDescription = ?
-				, vendorCode = ?
-				, vendorName = ?
-				, MPN = ?
-				, fineLine = ?
-				, fineLineName = ?
-				, retailPrice = ?
-				, priceUOM = ?
-				, weight = ?
-				, UPC = ?
-				, UPCdate = ?
-				, weightUOM = ?
-				, Brand = ?
-				, manCode = ?
-				, manName = ?
-				, discontinued = ?
-				, catSort = ?
-			WHERE productNumber = ?`
-
-			const params = [product.productNumber, product.productName, 
-				product.productStatus, product.productPageTitle, 
-				product.productUrl, product.productSDesc, 
-				product.productDisplay, product.productAltImg, 
-				product.productLDesc, product.productMetaDesc, 
-				product.productMKeywords, product.productKeywords, 
-				product.epicorDescription, product.vendorCode, 
-				product.vendorName, product.MPN, product.fineLine, 
-				product.fineLineName, product.retailPrice, product.priceUOM, 
-				product.weight, product.UPC, product.UPCdate, 
-				product.weightUOM, product.Brand, product.manCode, 
-				product.manName, product.discontinued, product.catSort, id]
-
-			return await db.execute(sql, params)
+			const sql = 'UPDATE ascproducts_materialize_changes SET ? WHERE ?'
+			return await db.query(sql, [product, {productNumber: id}])
 		} catch (ex) {
 			throw ex
 		}

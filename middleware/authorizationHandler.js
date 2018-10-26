@@ -4,7 +4,6 @@ const apiUser = require('../controllers/apiUserController')
 const authHandler = async (req, res, next) => {
 	try {
 		const authd = await apiUser.authorize(req)
-		console.info(`authenticated ${authd}`)
 		if (authd) return next()
 		throw 'unauthorized request'
 	} catch (ex) {

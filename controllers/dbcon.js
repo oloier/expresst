@@ -16,8 +16,20 @@ class db {
 			const [rows] = await connect.execute(sql, params)
 			return rows
 		} catch (error) {
-			if (process.env.NODE_ENV == 'dev') {
-				throw `Error executing query: "${sql}"; ${error}; ${error.stack}`
+			if (process.env.NODE_ENV == 'development') {
+				throw `Error executing: "${sql}"; ${error}; ${error.stack}`
+			}
+		}
+	}
+
+	static async query(sql, params) {
+		try {
+			const connect = await mysql.createConnection(db.settings)
+			const [rows] = await connect.query(sql, params)
+			return rows
+		} catch (error) {
+			if (process.env.NODE_ENV == 'development') {
+				throw `Error querying: "${sql}"; ${error}; ${error.stack}`
 			}
 		}
 	}
