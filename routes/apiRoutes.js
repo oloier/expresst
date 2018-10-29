@@ -13,6 +13,7 @@ module.exports = function(dbtable) {
 			// always display, even when empty
 			res.json(rows)
 		} catch (ex) {
+			console.log(ex)
 			let err = new Error(ex)
 			err.status = 500
 			return next(err)

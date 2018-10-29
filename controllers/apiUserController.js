@@ -1,4 +1,5 @@
 const db = require('./DAL/mysqlDal')
+// const db = require('./DAL/postgreDal')
 const bcrypt = require('bcryptjs')
 
 class apiUser {
@@ -6,11 +7,11 @@ class apiUser {
 	static async getOne(email) {
 		try {
 			let sql = 'SELECT * FROM apiusers WHERE email=? LIMIT 1'
-			const [row] = await db.execute(sql, [email])
+			const row = await db.execute(sql, [email])
 			if (row == undefined || row.length == 0) {
 				throw 'no user found'
 			}
-			return row
+			return row[0]
 		} catch (ex) {
 			throw ex
 		}
@@ -58,8 +59,7 @@ class apiUser {
 				err.status = 400
 				throw err
 			}
-
-			return newUser.apiToken
+			return newUser.apitoken
 		} catch (ex) {
 			throw ex
 		}
@@ -73,7 +73,7 @@ class apiUser {
 			let pmatch = bcrypt.compareSync(userCreds.password, user.password)
 			if (!pmatch) throw 'invalid login credentials'
 
-			return user.apiToken
+			return user.apitoken
 		} catch (ex) {
 			throw ex
 		}
@@ -94,8 +94,8 @@ class apiUser {
 		const apiToken = parts.join(' ')
 
 		try {
-			let sql = 'SELECT * FROM apiusers WHERE apiToken=? LIMIT 1'
-			const [row] = await db.execute(sql, [apiToken])
+			let sql = 'SELECT * FROM apiusers WHERE apiToken = ? LIMIT 1'
+			const row = await db.execute(sql, [apiToken])
 			if (row == undefined || row.length == 0) return false
 
 			return true

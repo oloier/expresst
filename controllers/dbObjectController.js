@@ -1,13 +1,15 @@
-const db = require('./DAL/mysqlDal')
+const driver = require('./DAL/apiDal')
+// const driver = require('./DAL/mysqlDal')
+// const driver = require('./DAL/postgreDal')
 
-class dbObject {
-	constructor(tableName) {
-		this.table = tableName
-	}
+class driverObject extends driver {
+
 	async getOne(id) {
 		try {
-			const sql = `SELECT * FROM ${this.table} WHERE productNumber=?`
-			return await db.execute(sql, [id])
+			console.log(this.db)
+			this.primaryKey = await this.getKey()
+			const sql = `SELECT * FROM ${this.table} WHERE ${this.primaryKey}=?`
+			return await this.db.execute(sql, [id])
 		} catch (ex) {
 			throw ex
 		}
@@ -16,16 +18,20 @@ class dbObject {
 	async getAll() {
 		try {
 			const sql = `SELECT * FROM ${this.table}`
-			return await db.execute(sql)
+			return await this.db.execute(sql)
 		} catch (ex) {
 			throw ex
 		}
 	}
 
-	async add(product) {
+	async add(jsonObj) {
 		try {
-			const sql = `INSERT INTO ${this.table} SET ?`
-			return await db.query(sql, [product])
+			const sql = `INSERT INTO ${this.table} (?) VALUES (?)`
+			const params = [
+				Object.keys(jsonObj).toString(), 
+				Object.values(jsonObj).toString()
+			]
+			return await this.db.query(sql, params)
 		} catch (ex) {
 			throw ex
 		}
@@ -33,21 +39,24 @@ class dbObject {
 
 	async delete(id) {
 		try {
-			const sql = `DELETE FROM ${this.table} WHERE productNumber=?`
-			return await db.query(sql, [id])
+			this.primaryKey = await this.getKey()
+			const sql = `DELETE FROM ${this.table} WHERE ${this.primaryKey}=?`
+			return await this.db.query(sql, [id])
 		} catch (ex) {
 			throw ex
 		}
 	}
 
-	async update(id, product) {
+	async update(id, jsonObj) {
 		try {
-			const sql = `UPDATE ${this.table} SET ? WHERE ?`
-			return await db.query(sql, [product, {productNumber: id}])
+			this.primaryKey = await this.getKey()
+			console.log(jsonObj)
+			const sql = `UPDATE ${this.table} SET ? WHERE ${this.primaryKey}=?`
+			return await this.db.query(sql, [jsonObj, id])
 		} catch (ex) {
 			throw ex
 		}
 	}
 }
 
-module.exports = dbObject
+module.exports = driverObject
