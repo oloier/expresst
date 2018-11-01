@@ -1,16 +1,18 @@
-const db = require('./DAL/mysqlDal')
+const driver = require('./DAL/apiDal')
+// const driver = require('./DAL/mysqlDal')
+// const driver = require('./DAL/postgreDal')
 const bcrypt = require('bcryptjs')
 
-class apiUser {
+class apiUser extends driver {
 
 	static async getOne(email) {
 		try {
 			let sql = 'SELECT * FROM apiusers WHERE email=? LIMIT 1'
-			const [row] = await db.execute(sql, [email])
+			const row = await this.db.execute(sql, [email])
 			if (row == undefined || row.length == 0) {
 				throw 'no user found'
 			}
-			return row
+			return row[0]
 		} catch (ex) {
 			throw ex
 		}
@@ -50,7 +52,7 @@ class apiUser {
 
 			let sql = 'INSERT INTO apiusers (email, password) VALUES (?,?)'
 			const passHash = await bcrypt.hash(user.password, 8)
-			await db.execute(sql, [user.email, passHash])
+			await this.db.execute(sql, [user.email, passHash])
 
 			const newUser = await apiUser.getOne(user.email)
 			if (newUser == undefined || newUser.length == 0) {
@@ -58,8 +60,7 @@ class apiUser {
 				err.status = 400
 				throw err
 			}
-
-			return newUser.apiToken
+			return newUser.apitoken
 		} catch (ex) {
 			throw ex
 		}
@@ -73,7 +74,7 @@ class apiUser {
 			let pmatch = bcrypt.compareSync(userCreds.password, user.password)
 			if (!pmatch) throw 'invalid login credentials'
 
-			return user.apiToken
+			return user.apitoken
 		} catch (ex) {
 			throw ex
 		}
@@ -94,8 +95,8 @@ class apiUser {
 		const apiToken = parts.join(' ')
 
 		try {
-			let sql = 'SELECT * FROM apiusers WHERE apiToken=? LIMIT 1'
-			const [row] = await db.execute(sql, [apiToken])
+			let sql = 'SELECT * FROM apiusers WHERE apiToken = ? LIMIT 1'
+			const row = await this.db.execute(sql, [apiToken])
 			if (row == undefined || row.length == 0) return false
 
 			return true

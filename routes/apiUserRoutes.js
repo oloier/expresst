@@ -11,7 +11,7 @@ router.post('/login', async (req, res, next) => {
 
 		const apiToken = await apiUser.authenticate(user)
 		if (!apiToken) {
-			'invalid credentials'
+			throw 'invalid credentials'
 		}
 		res.json({
 			status: 'success', apiToken

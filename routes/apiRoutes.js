@@ -13,6 +13,7 @@ module.exports = function(dbtable) {
 			// always display, even when empty
 			res.json(rows)
 		} catch (ex) {
+			console.log(ex)
 			let err = new Error(ex)
 			err.status = 500
 			return next(err)
@@ -34,10 +35,8 @@ module.exports = function(dbtable) {
 
 	router.post('/', async (req, res, next) => {
 		try {
-			const rows = await DBModel.add(req.body)
-			if (rows != undefined && rows.length > 0) {
-				res.json(rows)
-			}
+			/* const rows =  */await DBModel.add(req.body)
+			res.json({status: 'success'})
 		} catch (ex) {
 			let err = new Error(ex)
 			err.status = 500
@@ -62,10 +61,8 @@ module.exports = function(dbtable) {
 	router.delete('/:id', async (req, res, next) => {
 		try {
 			const id = parseInt(req.params.id)
-			const rows = await DBModel.delete(id)
-			if (rows != undefined && rows.length > 0) {
-				res.json(rows)
-			}
+			await DBModel.delete(id)
+			res.json({status: 'success'})
 		} catch (ex) {
 			let err = new Error(ex)
 			err.status = 500
