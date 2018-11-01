@@ -6,7 +6,6 @@ class driverObject extends driver {
 
 	async getOne(id) {
 		try {
-			console.log(this.db)
 			this.primaryKey = await this.getKey()
 			const sql = `SELECT * FROM ${this.table} WHERE ${this.primaryKey}=?`
 			return await this.db.execute(sql, [id])

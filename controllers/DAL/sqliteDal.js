@@ -6,8 +6,12 @@ class MySQL {
 			host: process.env.DB_HOST,
 			user: process.env.DB_USER,
 			password: process.env.DB_PASSWORD,
+<<<<<<< HEAD
 			database: process.env.DB_DATABASE,
 			port: 1234
+=======
+			database: process.env.DB_DATABASE
+>>>>>>> 4563525f09e227eb68635bef89671ed41ca37ca1
 		}
 	}
 
