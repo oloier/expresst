@@ -14,7 +14,8 @@ router.post('/login', async (req, res, next) => {
 			throw 'invalid credentials'
 		}
 		res.json({
-			status: 'success', apiToken
+			status: 'success', 
+			apiAccessToken: apiToken
 		})
 	} catch (ex) {
 		let err = new Error(ex)

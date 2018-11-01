@@ -19,6 +19,7 @@ class databaseAccess {
 	
 	constructor(tableName/* , primaryKey */) {
 		this.table = tableName
+		// this.pkey = primaryKey
 	}
 
 	async getKey() {

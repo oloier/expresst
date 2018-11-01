@@ -15,7 +15,7 @@ module.exports = function(dbtable) {
 		} catch (ex) {
 			console.log(ex)
 			let err = new Error(ex)
-			err.status = 500
+			err.status = ex.status || 500
 			return next(err)
 		}
 	})
@@ -28,7 +28,7 @@ module.exports = function(dbtable) {
 			}
 		} catch (ex) {
 			let err = new Error(ex)
-			err.status = 500
+			err.status =  x.status || 500
 			return next(err)
 		}
 	})
@@ -39,7 +39,7 @@ module.exports = function(dbtable) {
 			res.json({status: 'success'})
 		} catch (ex) {
 			let err = new Error(ex)
-			err.status = 500
+			err.status = ex.status || 500
 			return next(err)
 		}
 	})
@@ -61,11 +61,16 @@ module.exports = function(dbtable) {
 	router.delete('/:id', async (req, res, next) => {
 		try {
 			const id = parseInt(req.params.id)
-			await DBModel.delete(id)
+			const deleted = await DBModel.delete(id)
+			if (deleted === false) {
+				let err = new Error('record not found')
+				err.status = 404
+				throw err
+			}
 			res.json({status: 'success'})
 		} catch (ex) {
 			let err = new Error(ex)
-			err.status = 500
+			err.status =  ex.status || 500
 			return next(err)
 		}
 	})

@@ -1,14 +1,14 @@
-const driver = require('./DAL/apiDal')
-// const driver = require('./DAL/mysqlDal')
-// const driver = require('./DAL/postgreDal')
+const apiDal = require('./DAL/apiDal')
 const bcrypt = require('bcryptjs')
+// instantiate our database driver and table
+const driver = new apiDal('apiusers')
 
-class apiUser extends driver {
+class apiUser {
 
 	static async getOne(email) {
 		try {
 			let sql = 'SELECT * FROM apiusers WHERE email=? LIMIT 1'
-			const row = await this.db.execute(sql, [email])
+			const row = await driver.db.execute(sql, [email])
 			if (row == undefined || row.length == 0) {
 				throw 'no user found'
 			}
@@ -52,7 +52,7 @@ class apiUser extends driver {
 
 			let sql = 'INSERT INTO apiusers (email, password) VALUES (?,?)'
 			const passHash = await bcrypt.hash(user.password, 8)
-			await this.db.execute(sql, [user.email, passHash])
+			await driver.db.execute(sql, [user.email, passHash])
 
 			const newUser = await apiUser.getOne(user.email)
 			if (newUser == undefined || newUser.length == 0) {
@@ -96,7 +96,7 @@ class apiUser extends driver {
 
 		try {
 			let sql = 'SELECT * FROM apiusers WHERE apiToken = ? LIMIT 1'
-			const row = await this.db.execute(sql, [apiToken])
+			const row = await driver.db.execute(sql, [apiToken])
 			if (row == undefined || row.length == 0) return false
 
 			return true
