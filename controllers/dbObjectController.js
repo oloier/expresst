@@ -1,6 +1,4 @@
 const driver = require('./DAL/apiDal')
-// const driver = require('./DAL/mysqlDal')
-// const driver = require('./DAL/postgreDal')
 
 class driverObject extends driver {
 
@@ -35,8 +33,12 @@ class driverObject extends driver {
 	async delete(id) {
 		try {
 			this.primaryKey = await this.getKey()
+			const rowExists = await this.getOne(id)
+			if (rowExists == undefined || rowExists.length == 0) return false
+			
 			const sql = `DELETE FROM ${this.table} WHERE ${this.primaryKey}=?`
 			return await this.db.query(sql, [id])
+
 		} catch (ex) {
 			throw ex
 		}
