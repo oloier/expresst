@@ -42,7 +42,7 @@ class databaseAccess {
 				pk = await this.db.execute(sql, [dbEngine().settings.database, this.table])
 				return pk[0].column_name || 'id'
 			case 'sqlite':
-				break
+				return 'ROWID'
 			default:
 				break
 			}

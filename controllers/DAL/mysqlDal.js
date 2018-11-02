@@ -11,7 +11,7 @@ class MySQL {
 		}
 	}
 
-	static async execute(sql, params) {
+	static async query(sql, params) {
 		try {
 			const connect = await mysql2.createConnection(MySQL.settings)
 			const [rows] = await connect.execute(sql, params)
@@ -23,7 +23,7 @@ class MySQL {
 		}
 	}
 
-	static async query(sql, params) {
+	static async execute(sql, params) {
 		try {
 			const connect = await mysql2.createConnection(MySQL.settings)
 			const [rows] = await connect.query(sql, params)

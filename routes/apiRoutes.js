@@ -28,11 +28,7 @@ module.exports = function(dbtable) {
 			}
 		} catch (ex) {
 			let err = new Error(ex)
-<<<<<<< HEAD
 			err.status = ex.status || 500
-=======
-			err.status =  x.status || 500
->>>>>>> 1085aaf19bbd88569fa3e9fa797e9b701c71e2d7
 			return next(err)
 		}
 	})

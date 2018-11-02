@@ -1,5 +1,6 @@
 const apiDal = require('./DAL/apiDal')
 const bcrypt = require('bcryptjs')
+const uuid = require('uuid/v1')
 // instantiate our database driver and table
 const driver = new apiDal('apiusers')
 
@@ -50,9 +51,20 @@ class apiUser {
 				throw err
 			}
 
-			let sql = 'INSERT INTO apiusers (email, password) VALUES (?,?)'
+			// hash and salt the user password, bless the bcrypt
 			const passHash = await bcrypt.hash(user.password, 8)
-			await driver.db.execute(sql, [user.email, passHash])
+
+			let sql = 'INSERT INTO apiusers (email, password) VALUES (?,?)'
+			let params = [user.email, passHash]
+
+			// we need to generate a UUID ourselves
+			if (process.env.DB_ENGINE === 'sqlite') {
+				console.log('sqlite is here?')
+				sql = sql.replace('password', 'password, apitoken')
+				sql = sql.replace(',?)', ',?,?)')
+				params.push(uuid())
+			}
+			await driver.db.query(sql, params)
 
 			const newUser = await apiUser.getOne(user.email)
 			if (newUser == undefined || newUser.length == 0) {
@@ -96,7 +108,7 @@ class apiUser {
 
 		try {
 			let sql = 'SELECT * FROM apiusers WHERE apiToken = ? LIMIT 1'
-			const row = await driver.db.execute(sql, [apiToken])
+			const row = await driver.db.query(sql, [apiToken])
 			if (row == undefined || row.length == 0) return false
 
 			return true

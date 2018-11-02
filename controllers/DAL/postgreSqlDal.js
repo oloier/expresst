@@ -12,7 +12,7 @@ class PostgreSQL {
 		}
 	}
 
-	static async execute(sql, params) {
+	static async query(sql, params) {
 		let postgre
 		try {
 			postgre = new Client(PostgreSQL.settings)
@@ -32,19 +32,19 @@ class PostgreSQL {
 		}
 	}
 
-	static async query(sql, params) {
+	static async execute(sql, params) {
 		let postgre
 		try {
 			postgre = new Client(PostgreSQL.settings)
 			await postgre.connect()
-
 			// on INSERT: insert field names separate from values
 			if (sql.indexOf(' VALUES ') !== -1) {
 				// replace first ? param with string
 				sql = sql.replace('?', Object.keys(params).toString())
 				// change parameters to just values as we just inserted fields
-				params = [Object.values(params)]
+				params = Object.values(params)
 			}
+			console.log(params)
 			
 			// i've lazily retrofit the MySQL escaping in postgres, sorry
 			// paramterize query, as messily as possible apparently.
