@@ -29,11 +29,6 @@ app.use('/api/invloc', invlocRoutes)
 
 // default home request
 app.get('/', (req, res, ) => {
-	// const sqlstring = require('sqlstring')
-	// const sql = `UPDATE 'prod' (?) VALUES (?) WHERE productNumber=? ?`
-	// obj = {name: 'nah', face: 'i guess', nose: 'goes'}
-	// const str = sqlstring.format(sql, [Object.keys(obj), Object.values(obj), 1, 4])
-	// res.send(str)
 	res.json({ /* home: 'yup' */ })
 })
 
