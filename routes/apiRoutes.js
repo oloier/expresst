@@ -22,7 +22,17 @@ module.exports = function(dbtable) {
 
 	router.get('/', async (req, res, next) => {
 		try {
-			const rows = await DBModel.getAll()
+			let sortby = req.query.sortby || null
+			let limit = parseInt(req.query.limit)
+			let offset = parseInt(req.query.offset)
+			limit = (isNaN(limit)) ? null : req.query.limit
+			offset = (isNaN(offset)) ? null : req.query.offset
+			let filters = {
+				sortby,
+				limit,
+				offset
+			}
+			const rows = await DBModel.getAll(filters)
 			if (rows != undefined && rows.length > 0) {
 				res.json(rows)
 			}
@@ -35,7 +45,7 @@ module.exports = function(dbtable) {
 
 	router.post('/', async (req, res, next) => {
 		try {
-			/* const rows =  */await DBModel.add(req.body)
+			await DBModel.add(req.body)
 			res.json({status: 'success'})
 		} catch (ex) {
 			let err = new Error(ex)

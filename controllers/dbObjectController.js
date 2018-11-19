@@ -4,7 +4,6 @@ class driverObject extends driver {
 
 	async getOne(id) {
 		try {
-			this.primaryKey = await this.getKey()
 			const sql = `SELECT * FROM ${this.table} WHERE ${this.primaryKey}=?`
 			return await this.db.query(sql, [id])
 		} catch (ex) {
@@ -12,9 +11,31 @@ class driverObject extends driver {
 		}
 	}
 
-	async getAll() {
+	buildFilterQuery(filters) {
+		let querySuffix = ''
+
+		if (filters.sortby) {
+			let order = 'ASC'
+			// split the :desc suffix if present
+			if (!filters.sortby.indexOf(':') !== -1) {
+				let sortSplit = filters.sortby.split(':')
+				filters.sortby = sortSplit[0]
+				if (sortSplit[1] == 'desc') order = 'DESC'
+			}
+			querySuffix += ` ORDER BY ${filters.sortby} ${order}`
+		}
+		if (filters.limit) querySuffix += ` LIMIT ${filters.limit}`
+		if (filters.offset) querySuffix += ` OFFSET ${filters.offset}`
+
+		return querySuffix
+	}
+
+	async getAll(filters = null) {
 		try {
-			const sql = `SELECT * FROM ${this.table}`
+			let sql = `SELECT * FROM ${this.table} WHERE 1=1`
+			if (filters != null) {
+				sql += this.buildFilterQuery(filters)
+			}
 			return await this.db.query(sql)
 		} catch (ex) {
 			throw ex
@@ -32,7 +53,7 @@ class driverObject extends driver {
 
 	async delete(id) {
 		try {
-			this.primaryKey = await this.getKey()
+			// this.primaryKey = await this.getKey()
 			const rowExists = await this.getOne(id)
 			if (rowExists == undefined || rowExists.length == 0) return false
 			
@@ -46,7 +67,7 @@ class driverObject extends driver {
 
 	async update(id, jsonObj) {
 		try {
-			this.primaryKey = await this.getKey()
+			// this.primaryKey = await this.getKey()
 			const sql = `UPDATE ${this.table} SET ? WHERE ${this.primaryKey}=?`
 			return await this.db.execute(sql, [jsonObj, id])
 		} catch (ex) {

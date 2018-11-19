@@ -1,7 +1,7 @@
 DROP TABLE IF EXISTS apiusers;
 
 CREATE TABLE IF NOT EXISTS apiusers(
-	userid INT PRIMARY KEY, 
+	userid INTEGER PRIMARY KEY, 
 	email TEXT NOT NULL, 
 	password TEXT NOT NULL, 
 	apitoken TEXT, 
@@ -17,3 +17,11 @@ CREATE TRIGGER [dateupdatedTrigger]
 	BEGIN
 		UPDATE apiusers SET dateupdated=CURRENT_TIMESTAMP WHERE userid=OLD.userid;
 	END;
+
+CREATE TRIGGER [generateApiToken]
+	AFTER INSERT ON apiusers
+	FOR EACH ROW
+	BEGIN
+		UPDATE apiusers SET apitoken=LOWER(HEX(RANDOMBLOB(16))) WHERE userid=NEW.userid;
+	END;
+ 

@@ -44,7 +44,6 @@ class PostgreSQL {
 				// change parameters to just values as we just inserted fields
 				params = Object.values(params)
 			}
-			console.log(params)
 			
 			// i've lazily retrofit the MySQL escaping in postgres, sorry
 			// paramterize query, as messily as possible apparently.
