@@ -5,6 +5,11 @@ app.use(express.urlencoded({extended: false}))
 app.disable('x-powered-by') // remove the 'X-Powered-By: Express' header
 app.set('json spaces', 2) // basic pretty-print
 
+// default home request
+app.get('/', (req, res, ) => {
+	res.json({})
+})
+
 // require authentication for any API requests
 const authorizationHandler = require('./middleware/authorizationHandler')
 app.use('/api*', authorizationHandler)
@@ -20,16 +25,8 @@ app.use('/apiusers', apiusers)
 const productRoutes = require('./routes/apiRoutes')('products', 'productNumber')
 app.use('/api/products', productRoutes)
 
-const test = require('./routes/apiRoutes')('test')
-app.use('/test', test)
-
-const invlocRoutes = require('./routes/apiRoutes')('inventories_locations')
+const invlocRoutes = require('./routes/apiRoutes')('inventories_locations', 'productNumber')
 app.use('/api/invloc', invlocRoutes)
-
-// default home request
-app.get('/', (req, res, ) => {
-	res.json({ /* home: 'yup' */ })
-})
 
 
 // global error handler middleware, receives all Error exception

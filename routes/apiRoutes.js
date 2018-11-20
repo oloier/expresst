@@ -1,11 +1,11 @@
 const express = require('express')
 const dbObject = require('../controllers/dbObjectController')
 
-module.exports = function(dbtable) {
+module.exports = function(dbtable, pkey) {
 	let router = express.Router()
 
 	// instantiate our REST class
-	const DBModel = new dbObject(dbtable)
+	const DBModel = new dbObject(dbtable, pkey)
 
 	router.get('/:id', async (req, res, next) => {
 		try {

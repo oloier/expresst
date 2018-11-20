@@ -2,7 +2,7 @@ const apiDal = require('./DAL/apiDal')
 const bcrypt = require('bcryptjs')
 
 // instantiate our database driver and table
-const driver = new apiDal('apiusers')
+const driver = new apiDal('apiusers', 'userid')
 
 class apiUser {
 
@@ -25,9 +25,7 @@ class apiUser {
 			if (exist) return true
 			return false
 		} catch (ex) {
-			// don't throw our exception here, we're expecting
-			// it for sucessful registration requests
-			// throw ex
+			return false
 		}
 	}
 
@@ -57,7 +55,7 @@ class apiUser {
 			// populate query with posted form, execute
 			let sql = 'INSERT INTO apiusers (email, password) VALUES (?,?)'
 			let params = [user.email, passHash]
-			await driver.db.query(sql, params)
+			await driver.db.execute(sql, params)
 
 			const newUser = await apiUser.getOne(user.email)
 			if (newUser == undefined || newUser.length == 0) {

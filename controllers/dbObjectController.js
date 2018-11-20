@@ -11,6 +11,7 @@ class driverObject extends driver {
 		}
 	}
 
+	// for filtering getAll() requests with pagination and sorting
 	buildFilterQuery(filters) {
 		let querySuffix = ''
 
@@ -33,9 +34,9 @@ class driverObject extends driver {
 	async getAll(filters = null) {
 		try {
 			let sql = `SELECT * FROM ${this.table} WHERE 1=1`
-			if (filters != null) {
+			if (filters != null) 
 				sql += this.buildFilterQuery(filters)
-			}
+			
 			return await this.db.query(sql)
 		} catch (ex) {
 			throw ex
@@ -53,13 +54,11 @@ class driverObject extends driver {
 
 	async delete(id) {
 		try {
-			// this.primaryKey = await this.getKey()
 			const rowExists = await this.getOne(id)
 			if (rowExists == undefined || rowExists.length == 0) return false
 			
 			const sql = `DELETE FROM ${this.table} WHERE ${this.primaryKey}=?`
 			return await this.db.execute(sql, [id])
-
 		} catch (ex) {
 			throw ex
 		}
@@ -67,7 +66,6 @@ class driverObject extends driver {
 
 	async update(id, jsonObj) {
 		try {
-			// this.primaryKey = await this.getKey()
 			const sql = `UPDATE ${this.table} SET ? WHERE ${this.primaryKey}=?`
 			return await this.db.execute(sql, [jsonObj, id])
 		} catch (ex) {

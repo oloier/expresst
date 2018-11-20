@@ -37,19 +37,22 @@ class PostgreSQL {
 		try {
 			postgre = new Client(PostgreSQL.settings)
 			await postgre.connect()
-			// on INSERT: insert field names separate from values
-			if (sql.indexOf(' VALUES ') !== -1) {
-				// replace first ? param with string
-				sql = sql.replace('?', Object.keys(params).toString())
-				// change parameters to just values as we just inserted fields
+
+			// on INSERT: custom parameterization
+			if (sql.indexOf('(?) VALUES (?)') !== -1) {
+				// replace first ? with quoted object keys
+				sql = sql.replace('?', Object.keys(params).map(x => `"${x}"`).join(','))
+				// change to ?,?,? * params count
+					.replace('?', Object.values(params).map(() => '?').join(','))
+
+				// replace ?,?,? with postgre parameters ($1, $2, $3)
+				sql = PostgreSQL.postgreParamSyntax(sql)
+
+				// update params value array; our keys are in place
 				params = Object.values(params)
 			}
 			
-			// i've lazily retrofit the MySQL escaping in postgres, sorry
-			// paramterize query, as messily as possible apparently.
-			sql = sqlstring.format(sql, params || []).replace(/`/g, '"') 
-			
-			const result = await postgre.query(sql)
+			const result = await postgre.query(sql, params)
 			return result.rows
 		} catch (error) {
 			if (process.env.NODE_ENV == 'development') {
