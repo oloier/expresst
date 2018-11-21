@@ -17,9 +17,8 @@ class MySQL {
 			const [rows] = await connect.execute(sql, params)
 			return rows
 		} catch (error) {
-			if (process.env.NODE_ENV == 'development') {
+			if (process.env.NODE_ENV == 'development')
 				throw `Error executing: "${sql}"; ${error}; ${error.stack}`
-			}
 		}
 	}
 
@@ -29,9 +28,8 @@ class MySQL {
 			const [rows] = await connect.query(sql, params)
 			return rows
 		} catch (error) {
-			if (process.env.NODE_ENV == 'development') {
+			if (process.env.NODE_ENV == 'development')
 				throw `Error querying: "${sql}"; ${error}; ${error.stack}`
-			}
 		}
 	}
 }

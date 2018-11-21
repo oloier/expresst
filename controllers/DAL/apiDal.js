@@ -1,5 +1,5 @@
 
-class databaseAccess {
+class DatabaseAccess {
 	
 	constructor(tableName, primaryKey) {
 		this.table = tableName
@@ -10,13 +10,12 @@ class databaseAccess {
 	get db() {
 		switch (process.env.DB_ENGINE) {
 		case 'postgres':
-			return require('./postgreSqlDal')
+			return require('./postgresqlDAL')
 		case 'mysql':
-			return require('./mySqlDal')
+			return require('./mysqlDAL')
 		case 'sqlite':
-			return require('./sqliteDal')
 		default:
-			return require('./sqliteDal')
+			return require('./sqliteDAL')
 		}
 	}
 
@@ -52,4 +51,4 @@ class databaseAccess {
 	}*/
 }
 
-module.exports = databaseAccess
+module.exports = DatabaseAccess

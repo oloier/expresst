@@ -1,5 +1,6 @@
-const { Client } = require('pg')
-const sqlstring = require('sqlstring')
+const {Client} = require('pg')
+const sqlstring = require('./prepareExecute')
+const prepareExecute = require('./prepareExecute')
 
 class PostgreSQL {
 	static get settings() {
@@ -17,16 +18,15 @@ class PostgreSQL {
 		try {
 			postgre = new Client(PostgreSQL.settings)
 			await postgre.connect()
-			
+
 			// replace ? with $1, $2 for proper prepared postgres
-			sql = PostgreSQL.postgreParamSyntax(sql)
+			sql = prepareExecute.postgreParamSyntax(sql)
 
 			const result = await postgre.query(sql, params)
 			return result.rows
 		} catch (error) {
-			if (process.env.NODE_ENV == 'development') {
+			if (process.env.NODE_ENV == 'development')
 				throw `Error executing: ${sql}; ${error}; ${error.stack}`
-			}
 		} finally {
 			await postgre.end()
 		}
@@ -37,37 +37,16 @@ class PostgreSQL {
 		try {
 			postgre = new Client(PostgreSQL.settings)
 			await postgre.connect()
-
-			// on INSERT: custom parameterization
-			if (sql.indexOf('(?) VALUES (?)') !== -1) {
-				// replace first ? with quoted object keys
-				sql = sql.replace('?', Object.keys(params).map(x => `"${x}"`).join(','))
-				// change to ?,?,? * params count
-					.replace('?', Object.values(params).map(() => '?').join(','))
-
-				// replace ?,?,? with postgre parameters ($1, $2, $3)
-				sql = PostgreSQL.postgreParamSyntax(sql)
-
-				// update params value array; our keys are in place
-				params = Object.values(params)
-			}
-			
-			const result = await postgre.query(sql, params)
+			const query = new prepareExecute(sql, params, true)
+			const result = await postgre.query(query.sql, query.params)
 			return result.rows
 		} catch (error) {
-			if (process.env.NODE_ENV == 'development') {
+			if (process.env.NODE_ENV == 'development')
 				throw `Error executing: ${sql}; ${error}; ${error.stack}`
-			}
 		} finally {
 			await postgre.end()
 		}
 	}
-	
-	static postgreParamSyntax(sql) {
-		let paramIndex = 1
-		return sql.replace(/\?/g, () => `$${paramIndex++}`)
-	}
-
 }
 
 module.exports = PostgreSQL
