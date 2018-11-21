@@ -46,9 +46,10 @@ class PrepareExecute {
 			newSql = this.escapedInsert
 			// keys are in the query, so just grab array of values
 			newParams = Object.values(this.params)
-		} else 
+		} 
+
 		// dynamic parameter updates for JSON posts
-		if (this.sql.indexOf('SET ? WHERE') !== -1) {
+		else if (this.sql.indexOf('SET ? WHERE') !== -1) {
 			// updates pass [{cols: vals}, primaryKey]
 			const pkey = this.params[1]
 			this.params = this.params[0] 
@@ -56,10 +57,12 @@ class PrepareExecute {
 			newParams = Object.values(this.params)
 			newParams.push(pkey)
 			newSql = this.escapedUpdate
-			// update sql to match parameter counts
-		} else 
-		if (this.postgreEscape) 
+		} 
+
+		// update sql to match parameter counts
+		else if (this.postgreEscape) {
 			newSql = PrepareExecute.postgreParamSyntax(newSql)
+		}
 
 		return {sql: newSql, params: newParams}
 	}
