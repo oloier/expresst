@@ -22,7 +22,7 @@ app.use('/apiusers', apiusers)
 
 // setup all database tables you'd like to include in the API
 // const productRoutes = require('./routes/apiRoutes')('ascproducts_materialize', 'productNumber')
-const productRoutes = require('./routes/apiRoutes')('ascproducts_materialize', 'productNumber')
+const productRoutes = require('./routes/apiRoutes')('products', 'productNumber')
 app.use('/api/products', productRoutes)
 
 const invlocRoutes = require('./routes/apiRoutes')('test', 'id')

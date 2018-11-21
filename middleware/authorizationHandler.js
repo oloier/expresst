@@ -6,7 +6,6 @@ const authHandler = async (req, res, next) => {
 		if (authd) return next()
 		throw 'unauthorized request'
 	} catch (ex) {
-		console.log(ex)
 		let err = new Error(ex)
 		err.status = 403
 		return next(err)

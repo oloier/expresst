@@ -11,16 +11,15 @@ router.post('/login', async (req, res, next) => {
 
 		const apiToken = await apiUser.authenticate(user)
 		if (!apiToken) {
-			throw 'invalid credentials'
+			throw new Error('invalid credentials')
 		}
 		res.json({
 			status: 'success', 
 			apiAccessToken: apiToken
 		})
 	} catch (ex) {
-		let err = new Error(ex)
-		err.status = ex.status || 500
-		next(err)
+		ex.status = ex.status || 500
+		next(ex)
 	}
 })
 

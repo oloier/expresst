@@ -3,18 +3,13 @@ const driver = require('./DAL/apiDal')
 class driverObject extends driver {
 
 	async getOne(id) {
-		try {
-			const sql = `SELECT * FROM ${this.table} WHERE ${this.primaryKey}=?`
-			return await this.db.query(sql, [id])
-		} catch (ex) {
-			throw ex
-		}
+		const sql = `SELECT * FROM ${this.table} WHERE ${this.primaryKey}=?`
+		return await this.db.query(sql, [id])
 	}
 
 	// for filtering getAll() requests with pagination and sorting
 	buildFilterQuery(filters) {
 		let querySuffix = ''
-
 		if (filters.sortby) {
 			let order = 'ASC'
 			// split the :desc suffix if present
@@ -32,45 +27,28 @@ class driverObject extends driver {
 	}
 
 	async getAll(filters = null) {
-		try {
-			let sql = `SELECT * FROM ${this.table} WHERE 1=1`
-			if (filters != null) 
-				sql += this.buildFilterQuery(filters)
-			
-			return await this.db.query(sql)
-		} catch (ex) {
-			throw ex
-		}
+		let sql = `SELECT * FROM ${this.table} WHERE 1=1`
+		if (filters != null) 
+			sql += this.buildFilterQuery(filters)
+		return await this.db.query(sql)
 	}
 
 	async add(jsonObj) {
-		try {
-			const sql = `INSERT INTO ${this.table} (?) VALUES (?)`
-			return await this.db.execute(sql, jsonObj)
-		} catch (ex) {
-			throw ex
-		}
+		const sql = `INSERT INTO ${this.table} (?) VALUES (?)`
+		return await this.db.execute(sql, jsonObj)
 	}
 
 	async delete(id) {
-		try {
-			const rowExists = await this.getOne(id)
-			if (rowExists == undefined || rowExists.length == 0) return false
-			
-			const sql = `DELETE FROM ${this.table} WHERE ${this.primaryKey}=?`
-			return await this.db.execute(sql, [id])
-		} catch (ex) {
-			throw ex
-		}
+		const rowExists = await this.getOne(id)
+		if (rowExists == undefined || rowExists.length == 0) return false
+		
+		const sql = `DELETE FROM ${this.table} WHERE ${this.primaryKey}=?`
+		return await this.db.execute(sql, [id])
 	}
 
 	async update(id, jsonObj) {
-		try {
-			const sql = `UPDATE ${this.table} SET ? WHERE ${this.primaryKey}=?`
-			return await this.db.execute(sql, [jsonObj, id])
-		} catch (ex) {
-			throw ex
-		}
+		const sql = `UPDATE ${this.table} SET ? WHERE ${this.primaryKey}=?`
+		return await this.db.execute(sql, [jsonObj, id])
 	}
 }
 

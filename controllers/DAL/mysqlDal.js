@@ -12,25 +12,15 @@ class MySQL {
 	}
 
 	static async query(sql, params) {
-		try {
-			const connect = await mysql2.createConnection(MySQL.settings)
-			const [rows] = await connect.execute(sql, params)
-			return rows
-		} catch (error) {
-			if (process.env.NODE_ENV == 'development')
-				throw `Error executing: "${sql}"; ${error}; ${error.stack}`
-		}
+		const connect = await mysql2.createConnection(MySQL.settings)
+		const [rows] = await connect.execute(sql, params)
+		return rows
 	}
 
 	static async execute(sql, params) {
-		try {
-			const connect = await mysql2.createConnection(MySQL.settings)
-			const [rows] = await connect.query(sql, params)
-			return rows
-		} catch (error) {
-			if (process.env.NODE_ENV == 'development')
-				throw `Error querying: "${sql}"; ${error}; ${error.stack}`
-		}
+		const connect = await mysql2.createConnection(MySQL.settings)
+		const [rows] = await connect.query(sql, params)
+		return rows
 	}
 }
 

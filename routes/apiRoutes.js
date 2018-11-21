@@ -13,29 +13,30 @@ module.exports = function(dbtable, pkey) {
 			// always display, even when empty
 			res.json(rows)
 		} catch (ex) {
-			console.log(ex)
 			let err = new Error(ex)
 			err.status = ex.status || 500
 			return next(err)
 		}
 	})
 
+	const parseFilters = (sortby, limit, offset) => {
+		sortby = sortby || null
+		const limitInt = parseInt(limit)
+		const offsetInt = parseInt(offset)
+		limit = (isNaN(limit)) ? null : limitInt
+		offset = (isNaN(offset)) ? null : offsetInt
+		return {
+			sortby,
+			limit,
+			offset
+		}
+	}
 	router.get('/', async (req, res, next) => {
 		try {
-			let sortby = req.query.sortby || null
-			let limit = parseInt(req.query.limit)
-			let offset = parseInt(req.query.offset)
-			limit = (isNaN(limit)) ? null : req.query.limit
-			offset = (isNaN(offset)) ? null : req.query.offset
-			let filters = {
-				sortby,
-				limit,
-				offset
-			}
+			const filters = parseFilters(req.query.sortby, req.query.limit, req.query.offset)
 			const rows = await DBModel.getAll(filters)
-			if (rows != undefined && rows.length > 0) {
+			if (rows != undefined && rows.length > 0)
 				res.json(rows)
-			}
 		} catch (ex) {
 			let err = new Error(ex)
 			err.status = ex.status || 500
@@ -61,7 +62,6 @@ module.exports = function(dbtable, pkey) {
 			if (rows.affectedRows <= 0) throw 'failed to update record'
 			res.json({status: 'success'})
 		} catch (ex) {
-			console.log(ex)
 			let err = new Error(ex)
 			err.status = ex.status || 500
 			return next(err)
