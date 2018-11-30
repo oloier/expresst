@@ -1,4 +1,4 @@
-const apiDal = require('./DAL/apiDal')
+const apiDal = require('./DAL/apiDAL')
 const bcrypt = require('bcryptjs')
 
 // instantiate our database driver and table
@@ -7,11 +7,11 @@ const driver = new apiDal('apiusers', 'userid')
 class apiUser {
 
 	static async getOne(email) {
-		let sql = 'SELECT * FROM apiusers WHERE email=? LIMIT 1'
+		const sql = 'SELECT * FROM apiusers WHERE email=? LIMIT 1'
 		const row = await driver.db.query(sql, [email])
 		if (row == undefined || row.length == 0) {
 			let err = new Error('user not found')
-			err.status = 404
+			err.code = 404
 			throw err
 		}
 
@@ -27,21 +27,21 @@ class apiUser {
 	static async register(user) {
 		if (!user.email || !user.password) {
 			let err = new Error('missing email and/or password')
-			err.status = 422
+			err.code = 422
 			throw err
 		}
 
 		var re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
 		if (!re.test(user.email)) {
 			let err = new Error('invalid email address')
-			err.status = 422
+			err.code = 422
 			throw err
 		}
 
 		const exist = await apiUser.emailExists(user.email)
 		if (exist) {
 			let err = new Error('email already registered')
-			err.status = 409
+			err.code = 409
 			throw err
 		}
 
@@ -56,7 +56,7 @@ class apiUser {
 		const newUser = await apiUser.getOne(user.email)
 		if (newUser == undefined || newUser.length == 0) {
 			let err = new Error('unknown error in registration')
-			err.status = 400
+			err.code = 400
 			throw err
 		}
 		return newUser.apitoken
@@ -64,12 +64,11 @@ class apiUser {
 
 	static async authenticate(userCreds) {
 		const user = await apiUser.getOne(userCreds.email)
-		if (user == undefined || user.length == 0) return false
 
 		let pmatch = bcrypt.compareSync(userCreds.password, user.password)
-		if (!pmatch) {
+		if (!pmatch || (user == undefined || user.length == 0 || !user.apiToken)) {
 			let err = new Error('invalid login credentials')
-			err.status = 403
+			err.code = 403
 			throw err
 		}
 		return user.apitoken

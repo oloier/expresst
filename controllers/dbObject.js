@@ -1,12 +1,13 @@
-const driver = require('./DAL/apiDal')
+const driver = require('./DAL/apiDAL')
 
 class driverObject extends driver {
 
-	async getOne(id) {
-		const sql = `SELECT * FROM ${this.table} WHERE ${this.primaryKey}=?`
-		return await this.db.query(sql, [id])
+	async rowExists(id) {
+		const rowExists = await this.getOne(id)
+		if (rowExists == undefined || rowExists.length == 0) return false
+		return true
 	}
-
+	
 	// for filtering getAll() requests with pagination and sorting
 	buildFilterQuery(filters) {
 		let querySuffix = ''
@@ -26,10 +27,14 @@ class driverObject extends driver {
 		return querySuffix
 	}
 
+	async getOne(id) {
+		const sql = `SELECT * FROM ${this.table} WHERE ${this.primaryKey}=?`
+		return await this.db.query(sql, [id])
+	}
+
 	async getAll(filters = null) {
 		let sql = `SELECT * FROM ${this.table} WHERE 1=1`
-		if (filters != null) 
-			sql += this.buildFilterQuery(filters)
+		if (filters != null) sql += this.buildFilterQuery(filters)
 		return await this.db.query(sql)
 	}
 
@@ -39,17 +44,17 @@ class driverObject extends driver {
 	}
 
 	async delete(id) {
-		const rowExists = await this.getOne(id)
-		if (rowExists == undefined || rowExists.length == 0) return false
-		
+		if (!this.rowExists(id)) return false
 		const sql = `DELETE FROM ${this.table} WHERE ${this.primaryKey}=?`
 		return await this.db.execute(sql, [id])
 	}
 
 	async update(id, jsonObj) {
+		if (!this.rowExists(id)) return false
 		const sql = `UPDATE ${this.table} SET ? WHERE ${this.primaryKey}=?`
 		return await this.db.execute(sql, [jsonObj, id])
 	}
+
 }
 
 module.exports = driverObject

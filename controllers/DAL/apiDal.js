@@ -1,9 +1,9 @@
 
 class DatabaseAccess {
-	
-	constructor(tableName, primaryKey) {
-		this.table = tableName
-		this.primaryKey = primaryKey
+
+	constructor(config) {
+		this.table = config.table
+		this.primaryKey = config.key
 	}
 	
 	// define what database engine the API will use

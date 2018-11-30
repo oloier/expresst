@@ -1,5 +1,18 @@
 const express = require('express')
-const dbObject = require('../controllers/dbObjectController')
+const dbObject = require('../controllers/dbObject')
+
+const parseFilters = (sortby, limit, offset) => {
+	sortby = sortby || null
+	const limitInt = parseInt(limit)
+	const offsetInt = parseInt(offset)
+	limit = (isNaN(limit)) ? null : limitInt
+	offset = (isNaN(offset)) ? null : offsetInt
+	return {
+		sortby,
+		limit,
+		offset
+	}
+}
 
 module.exports = function(dbtable, pkey) {
 	let router = express.Router()
@@ -10,27 +23,15 @@ module.exports = function(dbtable, pkey) {
 	router.get('/:id', async (req, res, next) => {
 		try {
 			const rows = await DBModel.getOne(req.params.id)
-			// always display, even when empty
-			res.json(rows)
+			res.json(rows) // always display, even when empty
 		} catch (ex) {
-			let err = new Error(ex)
-			err.status = ex.status || 500
+			console.error(ex)
+			let err = new Error('failed to retreive record')
+			err.code = 500
 			return next(err)
 		}
 	})
 
-	const parseFilters = (sortby, limit, offset) => {
-		sortby = sortby || null
-		const limitInt = parseInt(limit)
-		const offsetInt = parseInt(offset)
-		limit = (isNaN(limit)) ? null : limitInt
-		offset = (isNaN(offset)) ? null : offsetInt
-		return {
-			sortby,
-			limit,
-			offset
-		}
-	}
 	router.get('/', async (req, res, next) => {
 		try {
 			const filters = parseFilters(req.query.sortby, req.query.limit, req.query.offset)
@@ -38,8 +39,9 @@ module.exports = function(dbtable, pkey) {
 			if (rows != undefined && rows.length > 0)
 				res.json(rows)
 		} catch (ex) {
-			let err = new Error(ex)
-			err.status = ex.status || 500
+			console.error(ex)
+			let err = new Error('failed to retreive records')
+			err.code = 500
 			return next(err)
 		}
 	})
@@ -49,8 +51,9 @@ module.exports = function(dbtable, pkey) {
 			await DBModel.add(req.body)
 			res.json({status: 'success'})
 		} catch (ex) {
-			let err = new Error(ex)
-			err.status = ex.status || 500
+			console.error(ex)
+			let err = new Error('failed to create new record')
+			err.code = 400
 			return next(err)
 		}
 	})
@@ -59,12 +62,13 @@ module.exports = function(dbtable, pkey) {
 		try {
 			const id = parseInt(req.params.id)
 			const rows = await DBModel.update(id, req.body)
-			if (rows.affectedRows <= 0) throw 'failed to update record'
+			if (rows.affectedRows <= 0) 
+				throw new Error('failed to update record')
 			res.json({status: 'success'})
 		} catch (ex) {
-			let err = new Error(ex)
-			err.status = ex.status || 500
-			return next(err)
+			console.error(ex)
+			ex.code = 500
+			return next(ex)
 		}
 	})
 
@@ -72,16 +76,11 @@ module.exports = function(dbtable, pkey) {
 		try {
 			const id = parseInt(req.params.id)
 			const deleted = await DBModel.delete(id)
-			if (deleted === false) {
-				let err = new Error('record not found')
-				err.status = 404
-				throw err
-			}
+			if (!deleted) throw new Error('record not found')
 			res.json({status: 'success'})
 		} catch (ex) {
-			let err = new Error(ex)
-			err.status =  ex.status || 500
-			return next(err)
+			ex.code = 404
+			return next(ex)
 		}
 	})
 	
