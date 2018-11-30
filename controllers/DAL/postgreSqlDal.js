@@ -1,8 +1,9 @@
 const {Client} = require('pg')
 const prepareExecute = require('./prepareExecute')
 
-class PostgreSQL {
-	static get settings() {
+module.exports = class PostgreSQL {
+
+	get settings() {
 		return {
 			host: process.env.DB_HOST,
 			user: process.env.DB_USER,
@@ -12,20 +13,20 @@ class PostgreSQL {
 		}
 	}
 
-	static async query(sql, params) {
-		const postgre = new Client(PostgreSQL.settings)
+	async query(sql, params, selectColumns = null) {
+		const postgre = new Client(this.settings)
 		await postgre.connect()
 
-		// replace ? with $1, $2 for proper prepared postgres
 		sql = prepareExecute.postgreParamSyntax(sql)
+		if (selectColumns) sql = this.selectColumns(sql, selectColumns)
 		const result = await postgre.query(sql, params)
 
 		await postgre.end()
 		return result.rows
 	}
 
-	static async execute(sql, params) {
-		const postgre = new Client(PostgreSQL.settings)
+	async execute(sql, params) {
+		const postgre = new Client(this.settings)
 		await postgre.connect()
 		
 		const query = new prepareExecute(sql, params, true)
@@ -34,6 +35,16 @@ class PostgreSQL {
 		await postgre.end()
 		return result.rows
 	}
-}
 
-module.exports = PostgreSQL
+	/**
+	 * Formats query to return selectable columns
+	 * @param {string} sql - SQL query
+	 * @param {string} colArray - Array of columns to return on SELECT statements
+	 * @memberof PostgreSQL
+	 * @return {string} formatted SQL statement
+	 */
+	selectColumns(sql, colArray) {
+		return sql.replace('*', colArray.map(x => `"${x}"`).join(','))
+	}
+
+}

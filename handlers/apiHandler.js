@@ -14,15 +14,21 @@ const parseFilters = (sortby, limit, offset) => {
 	}
 }
 
-module.exports = function(dbtable, pkey) {
+/** 
+ * require() will create new instance of handler for 1 database table. 
+ * URL endpoints are fixed, but can be configured any way you'd like here.
+ * @param {Object} config (tableName, primaryKey, [selectableColumns])
+ */
+module.exports = (config) => {
+	// access router to add to express instance
 	let router = express.Router()
 
-	// instantiate our REST class
-	const DBModel = new dbObject(dbtable, pkey)
+	// instantiate our DAL class
+	const dataModel = new dbObject(config)
 
 	router.get('/:id', async (req, res, next) => {
 		try {
-			const rows = await DBModel.getOne(req.params.id)
+			const rows = await dataModel.getOne(req.params.id)
 			res.json(rows) // always display, even when empty
 		} catch (ex) {
 			console.error(ex)
@@ -35,7 +41,7 @@ module.exports = function(dbtable, pkey) {
 	router.get('/', async (req, res, next) => {
 		try {
 			const filters = parseFilters(req.query.sortby, req.query.limit, req.query.offset)
-			const rows = await DBModel.getAll(filters)
+			const rows = await dataModel.getAll(filters)
 			if (rows != undefined && rows.length > 0)
 				res.json(rows)
 		} catch (ex) {
@@ -48,7 +54,7 @@ module.exports = function(dbtable, pkey) {
 
 	router.post('/', async (req, res, next) => {
 		try {
-			await DBModel.add(req.body)
+			await dataModel.add(req.body)
 			res.json({status: 'success'})
 		} catch (ex) {
 			console.error(ex)
@@ -61,7 +67,7 @@ module.exports = function(dbtable, pkey) {
 	router.put('/:id', async (req, res, next) => {
 		try {
 			const id = parseInt(req.params.id)
-			const rows = await DBModel.update(id, req.body)
+			const rows = await dataModel.update(id, req.body)
 			if (rows.affectedRows <= 0) 
 				throw new Error('failed to update record')
 			res.json({status: 'success'})
@@ -75,7 +81,7 @@ module.exports = function(dbtable, pkey) {
 	router.delete('/:id', async (req, res, next) => {
 		try {
 			const id = parseInt(req.params.id)
-			const deleted = await DBModel.delete(id)
+			const deleted = await dataModel.delete(id)
 			if (!deleted) throw new Error('record not found')
 			res.json({status: 'success'})
 		} catch (ex) {
