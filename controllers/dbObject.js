@@ -1,10 +1,12 @@
-const driver = require('./DAL/apiDAL')
+const driver = require("./DAL/apiDAL")
 
 class driverObject extends driver {
 
 	async rowExists(id) {
 		const rowExists = await this.getOne(id)
-		if (rowExists == undefined || rowExists.length == 0) return false
+		if (rowExists == undefined || rowExists.length == 0) {
+			return false
+		}
 		return true
 	}
 	
@@ -13,10 +15,37 @@ class driverObject extends driver {
 		return await this.db.query(sql, [id], this.selectColumns)
 	}
 	
+	/**
+	 * method for returning multiple/all rows via GET + optional filtering parameters
+	 * @param {Object} [filters=null] - Object with 3 potential properties: sortby, limit, offset.
+	 * @returns array of table rows based on provided parameters
+	 * @memberof driverObject
+	 */
 	async getAll(filters = null) {
 		let sql = `SELECT * FROM ${this.tableName} WHERE 1=1`
-		if (filters != null) sql += this.buildFilterQuery(filters)
-		return await this.db.query(sql, null, this.selectColumns)
+		const params = []
+		if (filters && filters.sortby) {
+			let order = "ASC"
+			// split the :desc suffix if present
+			if (!filters.sortby.indexOf(":") !== -1) {
+				const sortSplit = filters.sortby.split(":")
+				filters.sortby = sortSplit[0]
+				if (sortSplit[1] == "desc") {
+					order = "DESC"
+				}
+			}
+			sql += ` ORDER BY ? ${order}` 
+			params.push(filters.sortby)
+		}
+		if (filters && filters.limit) {
+			sql += " LIMIT ?"
+			params.push(filters.limit)
+		}
+		if (filters && filters.offset) {
+			sql += " OFFSET ?"
+			params.push(filters.offset)
+		}
+		return await this.db.query(sql, params, this.selectColumns)
 	}
 	
 	async add(jsonObj) {
@@ -25,36 +54,30 @@ class driverObject extends driver {
 	}
 	
 	async delete(id) {
-		if (!this.rowExists(id)) return false
+		if (!this.rowExists(id)) {
+			return false
+		}
 		const sql = `DELETE FROM ${this.tableName} WHERE ${this.primaryKey}=?`
 		return await this.db.execute(sql, [id])
 	}
 	
+	// tODO add batch UPDATE and INSERT endpoints and queries
+
+	/**
+	 * uPDATE query
+	 * @param {*} id
+	 * @param {*} jsonObj
+	 * @returns
+	 * @memberof driverObject
+	 */
 	async update(id, jsonObj) {
-		if (!this.rowExists(id)) return false
+		if (!this.rowExists(id)) {
+			return false
+		}
 		const sql = `UPDATE ${this.tableName} SET ? WHERE ${this.primaryKey}=?`
 		return await this.db.execute(sql, [jsonObj, id])
 	}
 	
-	// for filtering getAll() requests with pagination and sorting
-	buildFilterQuery(filters) {
-		let querySuffix = ''
-		if (filters.sortby) {
-			let order = 'ASC'
-			// split the :desc suffix if present
-			if (!filters.sortby.indexOf(':') !== -1) {
-				let sortSplit = filters.sortby.split(':')
-				filters.sortby = sortSplit[0]
-				if (sortSplit[1] == 'desc') order = 'DESC'
-			}
-			querySuffix += ` ORDER BY ${filters.sortby} ${order}`
-		}
-		if (filters.limit) querySuffix += ` LIMIT ${filters.limit}`
-		if (filters.offset) querySuffix += ` OFFSET ${filters.offset}`
-
-		return querySuffix
-	}
-
 }
 
 module.exports = driverObject

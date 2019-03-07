@@ -1,5 +1,5 @@
-const {Client} = require('pg')
-const prepareExecute = require('./prepareExecute')
+const {Client} = require("pg")
+const prepareExecute = require("./prepareExecute")
 
 module.exports = class PostgreSQL {
 
@@ -9,7 +9,7 @@ module.exports = class PostgreSQL {
 			user: process.env.DB_USER,
 			password: process.env.DB_PASSWORD,
 			database: process.env.DB_DATABASE,
-			port: process.env.DB_PORT
+			port: process.env.DB_PORT,
 		}
 	}
 
@@ -18,7 +18,9 @@ module.exports = class PostgreSQL {
 		await postgre.connect()
 
 		sql = prepareExecute.postgreParamSyntax(sql)
-		if (selectColumns) sql = this.selectColumns(sql, selectColumns)
+		if (selectColumns) {
+			sql = this.selectColumns(sql, selectColumns)
+		}
 		const result = await postgre.query(sql, params)
 
 		await postgre.end()
@@ -37,14 +39,14 @@ module.exports = class PostgreSQL {
 	}
 
 	/**
-	 * Formats query to return selectable columns
+	 * formats query to return selectable columns
 	 * @param {string} sql - SQL query
 	 * @param {string} colArray - Array of columns to return on SELECT statements
 	 * @memberof PostgreSQL
 	 * @return {string} formatted SQL statement
 	 */
 	selectColumns(sql, colArray) {
-		return sql.replace('*', colArray.map(x => `"${x}"`).join(','))
+		return sql.replace("*", colArray.map((x) => `"${x}"`).join(","))
 	}
 
 }

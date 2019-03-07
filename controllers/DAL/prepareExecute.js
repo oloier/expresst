@@ -11,21 +11,25 @@ class PrepareExecute {
 
 	get escapedInsert() {
 		// replace first ? with quoted object keys, then change to ?,?,? * this.params count
-		this.sql = this.sql.replace('?', Object.keys(this.params).map(x => `"${x}"`).join(','))
-			.replace('?', Object.values(this.params).map(() => '?').join(','))
+		this.sql = this.sql.replace("?", Object.keys(this.params).map((x) => `"${x}"`).join(","))
+			.replace("?", Object.values(this.params).map(() => "?").join(","))
 
 		// postgrefy the escaped parameters
-		if (this.postgreEscape) this.sql = PrepareExecute.postgreParamSyntax(this.sql)
+		if (this.postgreEscape) {
+			this.sql = PrepareExecute.postgreParamSyntax(this.sql)
+		}
 		return this.sql
 	}
 
 	get escapedUpdate() {
-		if (Object.keys(this.params).length >= 0 && typeof(this.params) == 'object') {
+		if (Object.keys(this.params).length >= 0 && typeof(this.params) == "object") {
 			// replace first ? with quoted object keys
-			this.sql = this.sql.replace('?', Object.keys(this.params).map(x => `"${x}"=?`).join(','))
+			this.sql = this.sql.replace("?", Object.keys(this.params).map((x) => `"${x}"=?`).join(","))
 
 			// postgrefy the escaped parameters
-			if (this.postgreEscape) this.sql = PrepareExecute.postgreParamSyntax(this.sql)
+			if (this.postgreEscape) {
+				this.sql = PrepareExecute.postgreParamSyntax(this.sql)
+			}
 		}
 		return this.sql
 	}
@@ -41,7 +45,7 @@ class PrepareExecute {
 		let newParams = this.params
 
 		// dynamic parameter inserts for JSON posts
-		if (this.sql.indexOf('(?) VALUES (?)') !== -1) {
+		if (this.sql.indexOf("(?) VALUES (?)") !== -1) {
 			// update sql to match parameter counts
 			newSql = this.escapedInsert
 			// keys are in the query, so just grab array of values
@@ -49,7 +53,7 @@ class PrepareExecute {
 		} 
 
 		// dynamic parameter updates for JSON posts
-		else if (this.sql.indexOf('SET ? WHERE') !== -1) {
+		else if (this.sql.indexOf("SET ? WHERE") !== -1) {
 			// updates pass [{cols: vals}, primaryKey]
 			const pkey = this.params[1]
 			this.params = this.params[0] 
