@@ -5,11 +5,11 @@ app.use(express.urlencoded({
 	extended: false,
 }))
 app.use(express.json())
-app.disable("x-powered-by") // remove the 'X-Powered-By: Express' header
-app.set("json spaces", 2) // basic pretty-print
+app.disable("x-powered-by")
+app.set("json spaces", 2)
 
 // default home request
-app.get("/", (req, res,) => {
+app.get("/", (req, res) => {
 	res.json({})
 })
 
@@ -20,23 +20,14 @@ app.use("/", require("./handlers/apiUserHandler"))
 app.use("/api*", require("./handlers/authorizationHandler"))
 
 // setup tables and endpoints for your API
-const productRoutes = require("./handlers/apiHandler")({
-	tableName: "ascproducts_materialize",
-	key: "productNumber",
-	selectColumns: ["productNumber", "productName", "productUrlSku"],
+const claimsRoute = require("./handlers/apiHandler")({
+	tableName: "claims",
+	key: "file_number",
+	selectColumns: ["*"],
 })
-app.use("/api/products", productRoutes)
+app.use("/api/claims", claimsRoute)
 
-
-const postgreRoute = require("./handlers/apiHandler")({
-	tableName: "test",
-	key: "id",
-	selectColumns: ["name", "goals"],
-})
-app.use("/api/test", postgreRoute)
-
-// global error handler middleware, receives all Error exception
-// instances and responds with a 200 JSON response body
+// errors respond with JSON
 app.use(require("./handlers/errorHandler"))
 
 module.exports = app

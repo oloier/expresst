@@ -61,7 +61,7 @@ class driverObject extends driver {
 		return await this.db.execute(sql, [id])
 	}
 	
-	// tODO add batch UPDATE and INSERT endpoints and queries
+	// todo add batch UPDATE and INSERT endpoints and queries
 
 	/**
 	 * uPDATE query

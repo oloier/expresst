@@ -21,10 +21,8 @@ class apiUser {
 	static async getOne(email) {
 		const sql = "SELECT * FROM apiusers WHERE email=? LIMIT 1"
 		const row = await driver.db.query(sql, [email])
-		if (row == undefined || row.length === 0) {
-			const err = new Error("user not found")
-			err.code = 404
-			throw err
+		if (row === undefined || row.length === 0) {
+			return undefined
 		}
 		return row[0]
 	}
@@ -38,11 +36,6 @@ class apiUser {
 	 */
 	static async emailExists(email) {
 		return !!(await apiUser.getOne(email) || false)
-		// const exist = await apiUser.getOne(email) || false
-		// if (exist) {
-		// 	return true
-		// }
-		// return false
 	}
 
 
@@ -82,7 +75,7 @@ class apiUser {
 		const sql = "INSERT INTO apiusers (email, password) VALUES (?,?)"
 		const params = [user.email, passHash]
 		await driver.db.execute(sql, params)
-
+		
 		const newUser = await apiUser.getOne(user.email)
 		if (newUser === undefined || newUser.length === 0) {
 			const err = new Error("unknown error in registration")
@@ -104,7 +97,7 @@ class apiUser {
 		const user = await apiUser.getOne(userCreds.email)
 
 		const pmatch = bcrypt.compareSync(userCreds.password, user.password)
-		if (!pmatch || (user === undefined || user.length == 0 || !user.apiToken)) {
+		if (!pmatch || (user === undefined || !user.apitoken)) {
 			const err = new Error("invalid login credentials")
 			err.code = 403
 			throw err

@@ -52,7 +52,10 @@ class MySQL {
 	 * @return {string} formatted SQL statement
 	 */
 	selectColumns(sql, colArray) {
-		return sql.replace("*", colArray.map((x) => `\`${x}\``).join(","))
+		if (colArray.length === 1 && colArray[0] === "*") {
+			return sql
+		}
+		return sql.replace("*", colArray.map(x => `\`${x}\``).join(","))
 	}
 
 }
