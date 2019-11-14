@@ -11,7 +11,7 @@ class PrepareExecute {
 
 	get escapedInsert() {
 		// replace first ? with quoted object keys, then change to ?,?,? * this.params count
-		this.sql = this.sql.replace("?", Object.keys(this.params).map((x) => `"${x}"`).join(","))
+		this.sql = this.sql.replace("?", Object.keys(this.params).map(x => `"${x}"`).join(","))
 			.replace("?", Object.values(this.params).map(() => "?").join(","))
 
 		// postgrefy the escaped parameters
@@ -24,7 +24,7 @@ class PrepareExecute {
 	get escapedUpdate() {
 		if (Object.keys(this.params).length >= 0 && typeof(this.params) == "object") {
 			// replace first ? with quoted object keys
-			this.sql = this.sql.replace("?", Object.keys(this.params).map((x) => `"${x}"=?`).join(","))
+			this.sql = this.sql.replace("?", Object.keys(this.params).map(x => `"${x}"=?`).join(","))
 
 			// postgrefy the escaped parameters
 			if (this.postgreEscape) {
